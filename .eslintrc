@@ -1,0 +1,21 @@
+{
+  "env": {
+    "browser": true,
+    "es2021": true
+  },
+  "root": true,
+  "plugins": ["react"],
+  "extends": ["eslint:recommended", "plugin:react/recommended", "plugin:prettier/recommended"],
+  "rules": {
+    "react/react-in-jsx-scope": "off",
+    "react/prop-types": "off",
+    "react/jsx-no-target-blank": "off",
+    "no-unused-vars": "off",
+    "no-debugger": "off",
+    "react/display-name": "off",
+    "react/no-children-prop": "off",
+    "no-empty": "off",
+    "no-constant-condition": "off",
+    "no-unreachable": "off"
+  }
+}
