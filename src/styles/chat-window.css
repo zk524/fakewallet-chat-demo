@@ -33,7 +33,7 @@
   text-align: left;
 }
 
-@media (max-width: 450px) {
+@media (max-width: 600px) {
   .app {
     position: static;
     transform: unset;

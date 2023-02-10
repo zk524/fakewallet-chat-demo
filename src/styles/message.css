@@ -38,7 +38,8 @@
   white-space: pre-wrap;
   -webkit-font-smoothing: subpixel-antialiased;
   word-wrap: break-word;
-  width: calc(100% - 90px);
+  min-width: 200px;
+  width: calc(100% - 200px);
 }
 
 .sc-message--content.sent .sc-message--text {
@@ -80,8 +81,5 @@
   fill: rgba(86, 88, 103, 0.3);
 }
 
-@media (max-width: 450px) {
-  .sc-message {
-    width: 80%;
-  }
+@media (max-width: 600px) {
 }

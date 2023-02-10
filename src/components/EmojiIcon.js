@@ -1,6 +1,4 @@
-import React from 'react'
-
-const EmojiIcon = ({ tooltip, onClick, isActive }) => (
+export default ({ tooltip, onClick, isActive }) => (
   <div className="sc-user-input--picker-wrapper">
     {tooltip}
     <button id="sc-emoji-picker-button" className="sc-user-input--emoji-icon-wrapper" onClick={onClick}>
@@ -31,5 +29,3 @@ const EmojiIcon = ({ tooltip, onClick, isActive }) => (
     </button>
   </div>
 )
-
-export default EmojiIcon

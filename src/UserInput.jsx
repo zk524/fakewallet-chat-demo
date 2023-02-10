@@ -1,7 +1,10 @@
 import { useState, useRef } from 'react'
 import EmojiIcon from './components/EmojiIcon'
-import PopupWindow from './PopupWindow'
-import EmojiPicker from './components/EmojiPicker'
+import EmojiConvertor from 'emoji-js'
+import emojiData from './assets/emojiData'
+
+const emojiConvertor = new EmojiConvertor()
+emojiConvertor.init_env()
 
 export default (props) => {
   const [state, setState] = useState({
@@ -20,24 +23,19 @@ export default (props) => {
         onFocus={() => setState({ ...state, inputActive: true })}
         onBlur={() => setState({ ...state, inputActive: false })}
         ref={userInput}
-        onKeyDown={(event) => {
-          if (event.key === 'Enter' && !event.shiftKey) {
-            event.preventDefault()
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault()
             const text = userInput.current.textContent
             if (text && text.length > 0) {
-              props.onSubmit({
-                author: 'me',
-                type: 'text',
-                data: { text },
-              })
+              props.onSubmit({ author: 'me', type: 'text', data: { text } })
               userInput.current.innerHTML = ''
             }
           }
         }}
-        onKeyUp={(event) => {
-          const inputHasText = event.target.innerHTML.length !== 0 && event.target.innerText !== '\n'
-          setState({ ...state, inputHasText })
-        }}
+        onKeyUp={(e) =>
+          setState({ ...state, inputHasText: e.target.innerHTML.length !== 0 && e.target.innerText !== '\n' })
+        }
         contentEditable="true"
         placeholder="Write a reply..."
         className="sc-user-input--text"
@@ -51,33 +49,28 @@ export default (props) => {
             }}
             isActive={state.emojiPickerIsOpen}
             tooltip={
-              <PopupWindow
-                isOpen={state.emojiPickerIsOpen}
-                onClickedOutside={(e) => {
-                  if (document.querySelector('#sc-emoji-picker-button').contains(e.target)) {
-                    e.stopPropagation()
-                    e.preventDefault()
-                  }
-                  setState({ ...state, emojiPickerIsOpen: false })
-                }}
-                onInputChange={(event) => setState({ ...state, emojiFilter: event.target.value })}
-              >
-                <EmojiPicker
-                  onEmojiPicked={(emoji) => {
-                    setState({ ...state, emojiPickerIsOpen: false })
-                    if (state.inputHasText) {
-                      userInput.current.innerHTML += emoji
-                    } else {
-                      props.onSubmit({
-                        author: 'me',
-                        type: 'emoji',
-                        data: { emoji },
-                      })
-                    }
-                  }}
-                  filter={state.emojiFilter}
-                />
-              </PopupWindow>
+              <div className="sc-popup-window">
+                <div className={`sc-popup-window--cointainer ${state.emojiPickerIsOpen ? '' : 'closed'}`}>
+                  <div className="sc-emoji-picker">
+                    <div className="sc-emoji-picker--category">
+                      {emojiData.map(({ emoji }) => (
+                        <span
+                          className="sc-emoji-picker--emoji"
+                          key={emoji}
+                          onClick={() => {
+                            setState({ ...state, emojiPickerIsOpen: false })
+                            if (state.inputHasText) userInput.current.innerHTML += emoji
+                            else props.onSubmit({ author: 'me', type: 'emoji', data: { emoji } })
+                          }}
+                        >
+                          {emoji}
+                        </span>
+                      ))}
+                    </div>
+                    )
+                  </div>
+                </div>
+              </div>
             }
           />
         </div>
