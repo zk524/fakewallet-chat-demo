@@ -10,6 +10,70 @@ const notifyAudio = new Audio(incomingMessageSound)
 const emojiConvertor = new EmojiConvertor()
 emojiConvertor.init_env()
 
+const Emoji = ({ emojiPickerIsOpen, handleEmoji }) => (
+  <div style={{ position: 'relative', width: '150px' }}>
+    <div
+      style={{
+        position: 'absolute',
+        bottom: '20px',
+        right: '100px',
+        width: '330px',
+        maxHeight: '260px',
+        height: '260px',
+        boxShadow: '0px 7px 40px 2px rgba(148, 149, 150, 0.3)',
+        background: 'white',
+        borderRadius: '10px',
+        outline: 'none',
+        transition: '0.2s ease-in-out',
+        zIndex: '1',
+        padding: '0px 5px 5px 5px',
+        boxSizing: 'border-box',
+        ...(emojiPickerIsOpen
+          ? {}
+          : {
+              opacity: '0',
+              visibility: 'hidden',
+              bottom: '14px',
+            }),
+      }}
+    >
+      <div
+        style={{
+          overflow: 'auto',
+          width: '100%',
+          maxHeight: '100%',
+          boxSizing: 'border-box',
+          padding: '10px',
+        }}
+      >
+        <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap' }}>
+          {emojiData.map(({ emoji }) => (
+            <span
+              style={{
+                margin: '5px',
+                width: '30px',
+                lineHeight: '30px',
+                textAlign: 'center',
+                cursor: 'pointer',
+                verticalAlign: 'middle',
+                fontSize: '28px',
+                transition: 'transform 60ms ease-out, -webkit-transform 60ms ease-out',
+                transitionDelay: '60ms',
+              }}
+              onMouseOver={(e) => (e.target.style.transform = 'scale(1.2)')}
+              onMouseOut={(e) => (e.target.style.transform = 'unset')}
+              key={emoji}
+              onClick={() => handleEmoji(emoji)}
+            >
+              {emoji}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+)
+
 export default () => {
   const [state, setState] = useState({ inputActive: false, inputHasText: false, emojiPickerIsOpen: false })
   const [messageList, setMessageList] = useState([
@@ -50,8 +114,8 @@ export default () => {
   }, [messageRef.current?.scrollHeight])
 
   return (
-    <div className="app">
-      <div className="sc-chat-window">
+    <div id="app">
+      <div id="chat-window">
         <div
           style={{
             background: '#4e8cff',
@@ -123,7 +187,22 @@ export default () => {
           ))}
         </div>
 
-        <form className={`sc-user-input ${state.inputActive ? 'active' : ''}`}>
+        <form
+          style={{
+            minHeight: '100px',
+            margin: '0px',
+            position: 'relative',
+            bottom: 0,
+            display: 'flex',
+            backgroundColor: '#f4f7f9',
+            borderBottomLeftRadius: '10px',
+            borderBottomRightRadius: '10px',
+            transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
+            ...(state.inputActive
+              ? { backgroundColor: 'white', boxShadow: '0px -5px 20px 0px rgba(150, 165, 190, 0.2)' }
+              : {}),
+          }}
+        >
           <div
             role="button"
             tabIndex="0"
@@ -136,82 +215,66 @@ export default () => {
             }
             contentEditable="true"
             placeholder="Write a reply..."
-            className="sc-user-input--text"
+            style={{
+              width: '100%',
+              resize: 'none',
+              border: 'none',
+              outline: 'none',
+              borderBottomLeftRadius: '10px',
+              boxSizing: 'border-box',
+              padding: '18px 36px 18px 18px',
+              fontSize: '15px',
+              fontWeight: 400,
+              lineHeight: 1.33,
+              whiteSpace: 'pre-wrap',
+              wordWrap: 'break-word',
+              color: '#565867',
+              webkitFontSmoothing: 'antialiased',
+              maxHeight: '200px',
+              overflow: 'scroll',
+              bottom: 0,
+              overflowX: 'hidden',
+              overflowY: 'auto',
+            }}
           ></div>
-          <div className="sc-user-input--buttons">
-            <div className="sc-user-input--button">
+          <div
+            style={{
+              marginTop: '10px',
+              width: '100px',
+              position: 'absolute',
+              right: '10px',
+              height: '100%',
+              display: 'flex',
+              justifyContent: 'flex-end',
+            }}
+          >
+            <div
+              style={{
+                width: '30px',
+                height: '55px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifCcontent: 'center',
+              }}
+            >
               <EmojiIcon
                 onClick={(e) => {
                   e.preventDefault()
                   setState({ ...state, emojiPickerIsOpen: !state.emojiPickerIsOpen })
                 }}
                 isActive={state.emojiPickerIsOpen}
-                tooltip={
-                  <div style={{ position: 'relative', width: '150px' }}>
-                    <div
-                      style={{
-                        position: 'absolute',
-                        bottom: '20px',
-                        right: '100px',
-                        width: '330px',
-                        maxHeight: '260px',
-                        height: '260px',
-                        boxShadow: '0px 7px 40px 2px rgba(148, 149, 150, 0.3)',
-                        background: 'white',
-                        borderRadius: '10px',
-                        outline: 'none',
-                        transition: '0.2s ease-in-out',
-                        zIndex: '1',
-                        padding: '0px 5px 5px 5px',
-                        boxSizing: 'border-box',
-                        ...(state.emojiPickerIsOpen
-                          ? {}
-                          : {
-                              opacity: '0',
-                              visibility: 'hidden',
-                              bottom: '14px',
-                            }),
-                      }}
-                    >
-                      <div
-                        style={{
-                          overflow: 'auto',
-                          width: '100%',
-                          maxHeight: '100%',
-                          boxSizing: 'border-box',
-                          padding: '10px',
-                        }}
-                      >
-                        <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap' }}>
-                          {emojiData.map(({ emoji }) => (
-                            <span
-                              style={{
-                                margin: '5px',
-                                width: '30px',
-                                lineHeight: '30px',
-                                textAlign: 'center',
-                                cursor: 'pointer',
-                                verticalAlign: 'middle',
-                                fontSize: '28px',
-                                transition: 'transform 60ms ease-out, -webkit-transform 60ms ease-out',
-                                transitionDelay: '60ms',
-                              }}
-                              onMouseOver={(e) => (e.target.style.transform = 'scale(1.2)')}
-                              onMouseOut={(e) => (e.target.style.transform = 'unset')}
-                              key={emoji}
-                              onClick={() => handleEmoji(emoji)}
-                            >
-                              {emoji}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                }
+                tooltip={<Emoji emojiPickerIsOpen={state.emojiPickerIsOpen} handleEmoji={handleEmoji} />}
               />
             </div>
-            <div className="sc-user-input--button">
+            <div
+              style={{
+                width: '30px',
+                height: '55px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifCcontent: 'center',
+              }}
+            >
               <SendIcon onClick={handleKeyDown} />
             </div>
           </div>

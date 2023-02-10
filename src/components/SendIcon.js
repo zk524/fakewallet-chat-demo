@@ -7,11 +7,26 @@ export default (props) => {
         e.preventDefault()
         props.onClick(e)
       }}
-      className="sc-user-input--send-icon-wrapper"
+      style={{
+        background: 'none',
+        border: 'none',
+        padding: '2px',
+        margin: '0px',
+        display: 'flex',
+        justifyContent: 'center',
+        flexDirection: 'row',
+      }}
     >
       <svg
         version="1.1"
-        className="sc-user-input--send-icon"
+        style={{
+          height: '20px',
+          width: '20px',
+          cursor: 'pointer',
+          alignSelf: 'center',
+          outline: 'none',
+          fill: 'rgba(86, 88, 103, 0.3)',
+        }}
         xmlns="http://www.w3.org/2000/svg"
         x="0px"
         y="0px"
