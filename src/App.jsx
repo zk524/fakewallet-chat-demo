@@ -6,18 +6,20 @@ import messageController from './controller/message'
 import Emoji from './components/Emoji'
 import Send from '@/components/Send'
 
+const _message = { type: 'text', author: 'wallet', data: { text: 'Welcome to Fake Wallet!' } }
 const notifyAudio = new Audio(incomingMessageSound)
 const emojiConvertor = new EmojiConvertor()
 emojiConvertor.init_env()
 
 export default () => {
-  const [state, setState] = useState({ inputActive: false, inputHasText: false, emojiPickerIsOpen: false })
-  const [messageList, setMessageList] = useState([
-    { type: 'text', author: 'wallet', data: { text: 'Welcome to Fake Wallet!' } },
-  ])
   const [messageRef, inputRef] = [useRef(null), useRef(null)]
+  const [messageList, setMessageList] = useState([_message])
+  const [state, setState] = useState({ inputActive: false, inputHasText: false, emojiPickerIsOpen: false, inputRef })
 
-  const sendMessage = (msg) => setMessageList([...messageList, msg])
+  const sendMessage = (msg) => {
+    setMessageList([...messageList, msg])
+  }
+
   const handleKeyDown = (e) => {
     if ((e.key === 'Enter' && !e.shiftKey) || e.type === 'click') {
       e.preventDefault()
@@ -27,11 +29,6 @@ export default () => {
         inputRef.current.innerHTML = ''
       }
     }
-  }
-  const handleEmoji = (emoji) => {
-    setState({ ...state, emojiPickerIsOpen: false })
-    if (state.inputHasText) inputRef.current.innerHTML += emoji
-    else sendMessage({ author: 'me', type: 'emoji', data: { emoji } })
   }
 
   useEffect(() => {
@@ -43,11 +40,8 @@ export default () => {
           notifyAudio.play()
         }
       })
-  }, [messageList])
-
-  useEffect(() => {
     messageRef.current.scrollTop = messageRef.current.scrollHeight
-  }, [messageRef.current?.scrollHeight])
+  }, [messageList])
 
   return (
     <div id="app">
@@ -193,7 +187,7 @@ export default () => {
                 justifCcontent: 'center',
               }}
             >
-              <Emoji handleEmoji={handleEmoji} state={state} setState={setState} />
+              <Emoji state={state} setState={setState} sendMessage={sendMessage} />
             </div>
             <div
               style={{

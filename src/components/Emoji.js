@@ -55,7 +55,7 @@ const emojiData = [
   '😑',
 ]
 
-export default ({ handleEmoji, state, setState }) => (
+export default ({ state, setState, sendMessage }) => (
   <div style={{ display: 'flex', flexDirection: 'column' }}>
     <div style={{ position: 'relative', width: '150px' }}>
       <div
@@ -109,7 +109,11 @@ export default ({ handleEmoji, state, setState }) => (
                 onMouseOver={(e) => (e.target.style.transform = 'scale(1.2)')}
                 onMouseOut={(e) => (e.target.style.transform = 'unset')}
                 key={emoji}
-                onClick={() => handleEmoji(emoji)}
+                onClick={() => {
+                  setState({ ...state, emojiPickerIsOpen: false })
+                  if (state.inputHasText) state.inputRef.current.innerHTML += emoji
+                  else sendMessage({ author: 'me', type: 'emoji', data: { emoji } })
+                }}
               >
                 {emoji}
               </span>
