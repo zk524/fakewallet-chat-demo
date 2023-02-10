@@ -1,78 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react'
 import Linkify from 'react-linkify'
 import EmojiConvertor from 'emoji-js'
-import EmojiIcon from '@/components/EmojiIcon'
-import SendIcon from '@/components/SendIcon'
-import emojiData from '@/assets/emojiData'
 import incomingMessageSound from '@/assets/notification.mp3'
+import Emoji from './components/Emoji'
+import Send from '@/components/Send'
 
 const notifyAudio = new Audio(incomingMessageSound)
 const emojiConvertor = new EmojiConvertor()
 emojiConvertor.init_env()
-
-const Emoji = ({ emojiPickerIsOpen, handleEmoji }) => (
-  <div style={{ position: 'relative', width: '150px' }}>
-    <div
-      style={{
-        position: 'absolute',
-        bottom: '20px',
-        right: '100px',
-        width: '330px',
-        maxHeight: '260px',
-        height: '260px',
-        boxShadow: '0px 7px 40px 2px rgba(148, 149, 150, 0.3)',
-        background: 'white',
-        borderRadius: '10px',
-        outline: 'none',
-        transition: '0.2s ease-in-out',
-        zIndex: '1',
-        padding: '0px 5px 5px 5px',
-        boxSizing: 'border-box',
-        ...(emojiPickerIsOpen
-          ? {}
-          : {
-              opacity: '0',
-              visibility: 'hidden',
-              bottom: '14px',
-            }),
-      }}
-    >
-      <div
-        style={{
-          overflow: 'auto',
-          width: '100%',
-          maxHeight: '100%',
-          boxSizing: 'border-box',
-          padding: '10px',
-        }}
-      >
-        <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap' }}>
-          {emojiData.map(({ emoji }) => (
-            <span
-              style={{
-                margin: '5px',
-                width: '30px',
-                lineHeight: '30px',
-                textAlign: 'center',
-                cursor: 'pointer',
-                verticalAlign: 'middle',
-                fontSize: '28px',
-                transition: 'transform 60ms ease-out, -webkit-transform 60ms ease-out',
-                transitionDelay: '60ms',
-              }}
-              onMouseOver={(e) => (e.target.style.transform = 'scale(1.2)')}
-              onMouseOut={(e) => (e.target.style.transform = 'unset')}
-              key={emoji}
-              onClick={() => handleEmoji(emoji)}
-            >
-              {emoji}
-            </span>
-          ))}
-        </div>
-      </div>
-    </div>
-  </div>
-)
 
 export default () => {
   const [state, setState] = useState({ inputActive: false, inputHasText: false, emojiPickerIsOpen: false })
@@ -160,7 +95,7 @@ export default () => {
                       fontSize: '14px',
                       lineHeight: '1.4',
                       whitSpace: 'pre-wrap',
-                      webkitFontSmoothing: 'subpixel-antialiased',
+                      WebkitFontSmoothing: 'subpixel-antialiased',
                       wordWrap: 'break-word',
                       minWidth: '200px',
                       width: 'calc(100% - 200px)',
@@ -229,7 +164,7 @@ export default () => {
               whiteSpace: 'pre-wrap',
               wordWrap: 'break-word',
               color: '#565867',
-              webkitFontSmoothing: 'antialiased',
+              WebkitFontSmoothing: 'antialiased',
               maxHeight: '200px',
               overflow: 'scroll',
               bottom: 0,
@@ -257,14 +192,7 @@ export default () => {
                 justifCcontent: 'center',
               }}
             >
-              <EmojiIcon
-                onClick={(e) => {
-                  e.preventDefault()
-                  setState({ ...state, emojiPickerIsOpen: !state.emojiPickerIsOpen })
-                }}
-                isActive={state.emojiPickerIsOpen}
-                tooltip={<Emoji emojiPickerIsOpen={state.emojiPickerIsOpen} handleEmoji={handleEmoji} />}
-              />
+              <Emoji handleEmoji={handleEmoji} state={state} setState={setState} />
             </div>
             <div
               style={{
@@ -275,7 +203,7 @@ export default () => {
                 justifCcontent: 'center',
               }}
             >
-              <SendIcon onClick={handleKeyDown} />
+              <Send onClick={handleKeyDown} />
             </div>
           </div>
         </form>
