@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react'
 import Linkify from 'react-linkify'
 import EmojiConvertor from 'emoji-js'
-import EmojiIcon from './components/EmojiIcon'
-import SendIcon from './components/SendIcon'
-import chatIconUrl from './assets/chat-icon.svg'
-import emojiData from './assets/emojiData'
-import incomingMessageSound from './assets/notification.mp3'
+import EmojiIcon from '@/components/EmojiIcon'
+import SendIcon from '@/components/SendIcon'
+import chatIconUrl from '@/assets/chat-icon.svg'
+import emojiData from '@/assets/emojiData'
+import incomingMessageSound from '@/assets/notification.mp3'
 
 const notifyAudio = new Audio(incomingMessageSound)
 const emojiConvertor = new EmojiConvertor()
