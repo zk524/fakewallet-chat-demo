@@ -10,23 +10,18 @@ export default () => {
     { type: 'text', author: 'wallet', data: { text: 'Welcome to Fake Wallet!' } },
   ])
   const messageRef = useRef(null)
-  useEffect(() => {
-    messageRef.current.scrollTop = messageRef.current.scrollHeight
-  }, [messageRef.current?.scrollHeight])
+
   useEffect(() => {
     const last = messageList.slice(-1)[0]
     if (last.author === 'me') {
-      setMessageList([
-        ...messageList,
-        {
-          type: 'text',
-          author: 'them',
-          data: { text: 'response...' },
-        },
-      ])
+      setMessageList([...messageList, { type: 'text', author: 'wallet', data: { text: 'response...' } }])
       notifyAudio.play()
     }
   }, [messageList])
+
+  useEffect(() => {
+    messageRef.current.scrollTop = messageRef.current.scrollHeight
+  }, [messageRef.current?.scrollHeight])
 
   return (
     <div className="app">
