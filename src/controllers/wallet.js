@@ -22,6 +22,20 @@ export async function init() {
   await getAppConfig().events.init(store, store.set)
 }
 
+const approveSession = () => {
+  console.log('ACTION', 'approveSession')
+  const { connector, chainId, address } = store
+  if (connector) connector.approveSession({ chainId, accounts: [address] })
+  store.set({ connector })
+}
+
+const rejectSession = () => {
+  console.log('ACTION', 'rejectSession')
+  const { connector } = store
+  if (connector) connector.rejectSession()
+  store.set({ connector })
+}
+
 function subscribeToEvents(connector) {
   console.log('ACTION', 'subscribeToEvents')
 
@@ -36,6 +50,9 @@ function subscribeToEvents(connector) {
       data: { text: `name: ${peerMeta.name}\ndescription: ${peerMeta.description}\nurl: ${peerMeta.url}` },
     })
     store.set({ peerMeta })
+    setTimeout(() => {
+      approveSession()
+    })
   })
 
   connector.on('session_update', (error) => {
