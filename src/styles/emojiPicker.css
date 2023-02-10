@@ -1,24 +1,15 @@
 .sc-emoji-picker {
   overflow: auto;
   width: 100%;
-  max-height: calc(100% - 40px);
+  max-height: 100%;
   box-sizing: border-box;
-  padding: 15px;
+  padding: 10px;
 }
 
 .sc-emoji-picker--category {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-}
-
-.sc-emoji-picker--category-title {
-  min-width: 100%;
-  color: #b8c3ca;
-  font-weight: 200;
-  font-size: 13px;
-  margin: 5px;
-  letter-spacing: 1px;
 }
 
 .sc-emoji-picker--emoji {
@@ -34,5 +25,5 @@
 }
 
 .sc-emoji-picker--emoji:hover {
-  transform: scale(1.4);
+  transform: scale(1.2);
 }

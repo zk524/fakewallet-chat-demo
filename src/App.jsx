@@ -3,7 +3,6 @@ import Linkify from 'react-linkify'
 import EmojiConvertor from 'emoji-js'
 import EmojiIcon from '@/components/EmojiIcon'
 import SendIcon from '@/components/SendIcon'
-import chatIconUrl from '@/assets/chat-icon.svg'
 import emojiData from '@/assets/emojiData'
 import incomingMessageSound from '@/assets/notification.mp3'
 
@@ -12,19 +11,38 @@ const emojiConvertor = new EmojiConvertor()
 emojiConvertor.init_env()
 
 export default () => {
+  const [state, setState] = useState({ inputActive: false, inputHasText: false, emojiPickerIsOpen: false })
   const [messageList, setMessageList] = useState([
     { type: 'text', author: 'wallet', data: { text: 'Welcome to Fake Wallet!' } },
   ])
-  const [state, setState] = useState({ inputActive: false, inputHasText: false, emojiPickerIsOpen: false })
   const messageRef = useRef(null)
   const inputRef = useRef(null)
 
+  const sendMessage = (msg) => setMessageList([...messageList, msg])
+  const handleKeyDown = (e) => {
+    if ((e.key === 'Enter' && !e.shiftKey) || e.type === 'click') {
+      e.preventDefault()
+      const text = inputRef.current.textContent
+      if (text && text.length > 0) {
+        sendMessage({ author: 'me', type: 'text', data: { text } })
+        inputRef.current.innerHTML = ''
+      }
+    }
+  }
+  const handleMessage = (msg) => {
+    console.log(msg)
+    sendMessage({ type: 'text', author: 'wallet', data: { text: 'response...' } })
+    notifyAudio.play()
+  }
+  const handleEmoji = (emoji) => {
+    setState({ ...state, emojiPickerIsOpen: false })
+    if (state.inputHasText) inputRef.current.innerHTML += emoji
+    else sendMessage({ author: 'me', type: 'emoji', data: { emoji } })
+  }
+
   useEffect(() => {
     const last = messageList.slice(-1)[0]
-    if (last.author === 'me') {
-      setMessageList([...messageList, { type: 'text', author: 'wallet', data: { text: 'response...' } }])
-      notifyAudio.play()
-    }
+    if (last.author === 'me') handleMessage(last)
   }, [messageList])
 
   useEffect(() => {
@@ -33,15 +51,27 @@ export default () => {
 
   return (
     <div className="app">
-      <div className="sc-chat-window opened">
-        <div className="sc-header">
-          <div className="sc-header--team-name"> {'Fake Wallet'} </div>
+      <div className="sc-chat-window">
+        <div
+          style={{
+            background: '#4e8cff',
+            minHeight: '50px',
+            borderTopLeftRadius: '9px',
+            borderTopRightRadius: '9px',
+            color: 'white',
+            padding: '10px',
+            boxShadow: '0 1px 4px rgba(0, 0, 0, 0.2)',
+            position: 'relative',
+            boxSizing: 'border-box',
+            display: 'flex',
+          }}
+        >
+          <div style={{ alignSelf: 'center', padding: '10px', flex: 1 }}>Fake Wallet</div>
         </div>
         <div className="sc-message-list" ref={messageRef}>
           {messageList.map((message, i) => (
             <div className="sc-message" key={'message' + i}>
               <div className={`sc-message--content ${message.author === 'me' ? 'sent' : 'received'}`}>
-                <div className="sc-message--avatar" style={{ backgroundImage: `url(${chatIconUrl})` }}></div>
                 {message.type === 'text' && (
                   <div className="sc-message--text">
                     {<Linkify properties={{ target: '_blank' }}>{message.data.text}</Linkify>}
@@ -60,16 +90,7 @@ export default () => {
             onFocus={() => setState({ ...state, inputActive: true })}
             onBlur={() => setState({ ...state, inputActive: false })}
             ref={inputRef}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault()
-                const text = inputRef.current.textContent
-                if (text && text.length > 0) {
-                  setMessageList([...messageList, { author: 'me', type: 'text', data: { text } }])
-                  inputRef.current.innerHTML = ''
-                }
-              }
-            }}
+            onKeyDown={handleKeyDown}
             onKeyUp={(e) =>
               setState({ ...state, inputHasText: e.target.innerHTML.length !== 0 && e.target.innerText !== '\n' })
             }
@@ -91,20 +112,11 @@ export default () => {
                       <div className="sc-emoji-picker">
                         <div className="sc-emoji-picker--category">
                           {emojiData.map(({ emoji }) => (
-                            <span
-                              className="sc-emoji-picker--emoji"
-                              key={emoji}
-                              onClick={() => {
-                                setState({ ...state, emojiPickerIsOpen: false })
-                                if (state.inputHasText) inputRef.current.innerHTML += emoji
-                                else setMessageList([...messageList, { author: 'me', type: 'emoji', data: { emoji } }])
-                              }}
-                            >
+                            <span className="sc-emoji-picker--emoji" key={emoji} onClick={() => handleEmoji(emoji)}>
                               {emoji}
                             </span>
                           ))}
                         </div>
-                        )
                       </div>
                     </div>
                   </div>
@@ -112,11 +124,7 @@ export default () => {
               />
             </div>
             <div className="sc-user-input--button">
-              <SendIcon
-                onClick={() => {
-                  console.log(1)
-                }}
-              />
+              <SendIcon onClick={handleKeyDown} />
             </div>
           </div>
         </form>
