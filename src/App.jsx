@@ -21,8 +21,8 @@ export default () => {
   }
 
   const handleKeyDown = (e) => {
+    e.preventDefault()
     if ((e.key === 'Enter' && !e.shiftKey) || e.type === 'click') {
-      e.preventDefault()
       const text = inputRef.current.textContent
       if (text && text.length > 0) {
         sendMessage({ author: 'me', type: 'text', data: { text } })
@@ -44,7 +44,7 @@ export default () => {
   }, [messageList])
 
   return (
-    <div id="app">
+    <div id="app" onClick={(e) => state.emojiPickerIsOpen && setState({ ...state, emojiPickerIsOpen: false })}>
       <div id="chat-window">
         <div
           style={{
