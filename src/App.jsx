@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import Linkify from 'react-linkify'
 import EmojiConvertor from 'emoji-js'
 import incomingMessageSound from '@/assets/notification.mp3'
+import messageController from './controller/message'
 import Emoji from './components/Emoji'
 import Send from '@/components/Send'
 
@@ -14,8 +15,7 @@ export default () => {
   const [messageList, setMessageList] = useState([
     { type: 'text', author: 'wallet', data: { text: 'Welcome to Fake Wallet!' } },
   ])
-  const messageRef = useRef(null)
-  const inputRef = useRef(null)
+  const [messageRef, inputRef] = [useRef(null), useRef(null)]
 
   const sendMessage = (msg) => setMessageList([...messageList, msg])
   const handleKeyDown = (e) => {
@@ -28,11 +28,6 @@ export default () => {
       }
     }
   }
-  const handleMessage = (msg) => {
-    console.log(msg)
-    sendMessage({ type: 'text', author: 'wallet', data: { text: 'response...' } })
-    notifyAudio.play()
-  }
   const handleEmoji = (emoji) => {
     setState({ ...state, emojiPickerIsOpen: false })
     if (state.inputHasText) inputRef.current.innerHTML += emoji
@@ -41,7 +36,13 @@ export default () => {
 
   useEffect(() => {
     const last = messageList.slice(-1)[0]
-    if (last.author === 'me') handleMessage(last)
+    if (last.author === 'me')
+      messageController(last).then((res) => {
+        if (res) {
+          sendMessage({ type: 'text', author: 'wallet', data: { text: res } })
+          notifyAudio.play()
+        }
+      })
   }, [messageList])
 
   useEffect(() => {
