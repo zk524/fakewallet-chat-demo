@@ -68,16 +68,56 @@ export default () => {
         >
           <div style={{ alignSelf: 'center', padding: '10px', flex: 1 }}>Fake Wallet</div>
         </div>
-        <div className="sc-message-list" ref={messageRef}>
+        <div
+          style={{
+            height: '80%',
+            overflowY: 'auto',
+            backgroundColor: 'white',
+            backgroundSize: '100%',
+            padding: '20px 0px',
+          }}
+          ref={messageRef}
+        >
           {messageList.map((message, i) => (
-            <div className="sc-message" key={'message' + i}>
-              <div className={`sc-message--content ${message.author === 'me' ? 'sent' : 'received'}`}>
+            <div style={{ width: 'calc(100% - 40px)', padding: '10px 20px', display: 'flex' }} key={'message' + i}>
+              <div
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  ...(message.author === 'me' ? { justifyContent: 'flex-end' } : {}),
+                }}
+              >
                 {message.type === 'text' && (
-                  <div className="sc-message--text">
+                  <div
+                    style={{
+                      padding: '17px 20px',
+                      borderRadius: '6px',
+                      fontWeight: '300',
+                      fontSize: '14px',
+                      lineHeight: '1.4',
+                      whitSpace: 'pre-wrap',
+                      webkitFontSmoothing: 'subpixel-antialiased',
+                      wordWrap: 'break-word',
+                      minWidth: '200px',
+                      width: 'calc(100% - 200px)',
+                      ...(message.author === 'me'
+                        ? {
+                            color: 'white',
+                            backgroundColor: '#4e8cff',
+                            maxWidth: 'calc(100% - 120px)',
+                            wordWrap: 'break-word',
+                          }
+                        : {
+                            color: '#263238',
+                            backgroundColor: '#f4f7f9',
+                            marginRight: '40px',
+                          }),
+                    }}
+                  >
                     {<Linkify properties={{ target: '_blank' }}>{message.data.text}</Linkify>}
                   </div>
                 )}
-                {message.type === 'emoji' && <div className="sc-message--emoji">{message.data.emoji}</div>}
+                {message.type === 'emoji' && <div style={{ fontSize: '40px' }}>{message.data.emoji}</div>}
               </div>
             </div>
           ))}
@@ -107,8 +147,32 @@ export default () => {
                 }}
                 isActive={state.emojiPickerIsOpen}
                 tooltip={
-                  <div className="sc-popup-window">
-                    <div className={`sc-popup-window--cointainer ${state.emojiPickerIsOpen ? '' : 'closed'}`}>
+                  <div style={{ position: 'relative', width: '150px' }}>
+                    <div
+                      style={{
+                        position: 'absolute',
+                        bottom: '20px',
+                        right: '100px',
+                        width: '330px',
+                        maxHeight: '260px',
+                        height: '260px',
+                        boxShadow: '0px 7px 40px 2px rgba(148, 149, 150, 0.3)',
+                        background: 'white',
+                        borderRadius: '10px',
+                        outline: 'none',
+                        transition: '0.2s ease-in-out',
+                        zIndex: '1',
+                        padding: '0px 5px 5px 5px',
+                        boxSizing: 'border-box',
+                        ...(state.emojiPickerIsOpen
+                          ? {}
+                          : {
+                              opacity: '0',
+                              visibility: 'hidden',
+                              bottom: '14px',
+                            }),
+                      }}
+                    >
                       <div
                         style={{
                           overflow: 'auto',
