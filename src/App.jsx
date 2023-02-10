@@ -109,10 +109,34 @@ export default () => {
                 tooltip={
                   <div className="sc-popup-window">
                     <div className={`sc-popup-window--cointainer ${state.emojiPickerIsOpen ? '' : 'closed'}`}>
-                      <div className="sc-emoji-picker">
-                        <div className="sc-emoji-picker--category">
+                      <div
+                        style={{
+                          overflow: 'auto',
+                          width: '100%',
+                          maxHeight: '100%',
+                          boxSizing: 'border-box',
+                          padding: '10px',
+                        }}
+                      >
+                        <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap' }}>
                           {emojiData.map(({ emoji }) => (
-                            <span className="sc-emoji-picker--emoji" key={emoji} onClick={() => handleEmoji(emoji)}>
+                            <span
+                              style={{
+                                margin: '5px',
+                                width: '30px',
+                                lineHeight: '30px',
+                                textAlign: 'center',
+                                cursor: 'pointer',
+                                verticalAlign: 'middle',
+                                fontSize: '28px',
+                                transition: 'transform 60ms ease-out, -webkit-transform 60ms ease-out',
+                                transitionDelay: '60ms',
+                              }}
+                              onMouseOver={(e) => (e.target.style.transform = 'scale(1.2)')}
+                              onMouseOut={(e) => (e.target.style.transform = 'unset')}
+                              key={emoji}
+                              onClick={() => handleEmoji(emoji)}
+                            >
                               {emoji}
                             </span>
                           ))}

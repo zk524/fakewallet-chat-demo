@@ -1,9 +1,20 @@
 export default ({ tooltip, onClick, isActive }) => (
-  <div className="sc-user-input--picker-wrapper">
+  <div style={{ display: 'flex', flexDirection: 'column' }}>
     {tooltip}
-    <button id="sc-emoji-picker-button" className="sc-user-input--emoji-icon-wrapper" onClick={onClick}>
+    <button
+      style={{
+        background: 'none',
+        border: 'none',
+        padding: '2px',
+        margin: '0px',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+      }}
+      onClick={onClick}
+    >
       <svg
-        className={`sc-user-input--emoji-icon ${isActive ? 'active' : ''}`}
+        style={{ height: '18px', cursor: 'pointer', alignSelf: 'center', fill: 'rgba(86, 88, 103, 0.3)' }}
         version="1.1"
         xmlns="http://www.w3.org/2000/svg"
         x="0px"
