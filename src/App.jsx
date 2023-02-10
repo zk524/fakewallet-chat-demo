@@ -21,12 +21,12 @@ export default () => {
   }
 
   const handleKeyDown = (e) => {
-    e.preventDefault()
     if ((e.key === 'Enter' && !e.shiftKey) || e.type === 'click') {
       const text = inputRef.current.textContent
       if (text && text.length > 0) {
-        sendMessage({ author: 'me', type: 'text', data: { text } })
+        e.preventDefault()
         inputRef.current.innerHTML = ''
+        sendMessage({ author: 'me', type: 'text', data: { text } })
       }
     }
   }
