@@ -1,24 +1,19 @@
-import React, { useState, useRef, useEffect } from 'react'
-import Linkify from 'react-linkify'
+import React, { useRef, useEffect } from 'react'
 import EmojiConvertor from 'emoji-js'
 import incomingMessageSound from '@/assets/notification.mp3'
-import messageController from './controller/message'
+import messageController from '@/controllers/message'
 import Emoji from './components/Emoji'
 import Send from '@/components/Send'
+import store, { observer } from '@/controllers/store'
+import { init } from '@/controllers/wallet'
 
-const _message = { type: 'text', author: 'wallet', data: { text: 'Welcome to Fake Wallet!' } }
 const notifyAudio = new Audio(incomingMessageSound)
 const emojiConvertor = new EmojiConvertor()
 emojiConvertor.init_env()
 
-export default () => {
+export default observer(() => {
+  const { messageList } = store
   const [messageRef, inputRef] = [useRef(null), useRef(null)]
-  const [messageList, setMessageList] = useState([_message])
-  const [state, setState] = useState({ inputActive: false, inputHasText: false, emojiPickerIsOpen: false, inputRef })
-
-  const sendMessage = (msg) => {
-    setMessageList([...messageList, msg])
-  }
 
   const handleKeyDown = (e) => {
     if ((e.key === 'Enter' && !e.shiftKey) || e.type === 'click') {
@@ -26,25 +21,30 @@ export default () => {
       if (text && text.length > 0) {
         e.preventDefault()
         inputRef.current.innerHTML = ''
-        sendMessage({ author: 'me', type: 'text', data: { text } })
+        store.setMessage({ author: 'me', type: 'text', data: { text } })
       }
     }
   }
 
   useEffect(() => {
+    init()
+  }, [])
+
+  useEffect(() => {
+    messageRef.current.scrollTop = messageRef.current.scrollHeight
     const last = messageList.slice(-1)[0]
     if (last.author === 'me')
       messageController(last).then((res) => {
         if (res) {
-          sendMessage({ type: 'text', author: 'wallet', data: { text: res } })
+          store.setMessage({ type: 'text', author: 'wallet', data: { text: res } })
           notifyAudio.play()
         }
       })
-    messageRef.current.scrollTop = messageRef.current.scrollHeight
+    else messageList.length > 1 && notifyAudio.play()
   }, [messageList])
 
   return (
-    <div id="app" onClick={(e) => state.emojiPickerIsOpen && setState({ ...state, emojiPickerIsOpen: false })}>
+    <div id="app" onClick={() => store.emojiPickerIsOpen && store.set({ emojiPickerIsOpen: false })}>
       <div id="chat-window">
         <div
           style={{
@@ -108,7 +108,7 @@ export default () => {
                           }),
                     }}
                   >
-                    {<Linkify properties={{ target: '_blank' }}>{message.data.text}</Linkify>}
+                    {<span style={{ whiteSpace: 'pre-wrap' }}>{message.data.text}</span>}
                   </div>
                 )}
                 {message.type === 'emoji' && <div style={{ fontSize: '40px' }}>{message.data.emoji}</div>}
@@ -128,7 +128,7 @@ export default () => {
             borderBottomLeftRadius: '10px',
             borderBottomRightRadius: '10px',
             transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
-            ...(state.inputActive
+            ...(store.inputActive
               ? { backgroundColor: 'white', boxShadow: '0px -5px 20px 0px rgba(150, 165, 190, 0.2)' }
               : {}),
           }}
@@ -136,13 +136,11 @@ export default () => {
           <div
             role="button"
             tabIndex="0"
-            onFocus={() => setState({ ...state, inputActive: true })}
-            onBlur={() => setState({ ...state, inputActive: false })}
+            onFocus={() => store.set({ inputActive: true })}
+            onBlur={() => store.set({ inputActive: false })}
             ref={inputRef}
             onKeyDown={handleKeyDown}
-            onKeyUp={(e) =>
-              setState({ ...state, inputHasText: e.target.innerHTML.length !== 0 && e.target.innerText !== '\n' })
-            }
+            onKeyUp={(e) => store.set({ inputHasText: e.target.innerHTML.length !== 0 && e.target.innerText !== '\n' })}
             contentEditable="true"
             placeholder="Write a reply..."
             style={{
@@ -187,7 +185,7 @@ export default () => {
                 justifCcontent: 'center',
               }}
             >
-              <Emoji state={state} setState={setState} sendMessage={sendMessage} />
+              <Emoji inputRef={inputRef} />
             </div>
             <div
               style={{
@@ -205,4 +203,4 @@ export default () => {
       </div>
     </div>
   )
-}
+})
