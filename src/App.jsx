@@ -1,25 +1,32 @@
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import Message from './Message'
 import UserInput from './UserInput'
-import mp3test from './assets/notification.mp3'
+import incomingMessageSound from './assets/notification.mp3'
+
+const notifyAudio = new Audio(incomingMessageSound)
 
 export default () => {
   const [messageList, setMessageList] = useState([
-    {
-      type: 'text',
-      author: 'them',
-      data: { text: "You've got to have a story." },
-    },
-    { type: 'emoji', author: 'me', data: { emoji: '😋' } },
-    {
-      type: 'file',
-      author: 'me',
-      data: {
-        url: mp3test,
-        fileName: 'test.mp3',
-      },
-    },
+    { type: 'text', author: 'wallet', data: { text: 'Welcome to Fake Wallet!' } },
   ])
+  const messageRef = useRef(null)
+  useEffect(() => {
+    messageRef.current.scrollTop = messageRef.current.scrollHeight
+  }, [messageRef.current?.scrollHeight])
+  useEffect(() => {
+    const last = messageList.slice(-1)[0]
+    if (last.author === 'me') {
+      setMessageList([
+        ...messageList,
+        {
+          type: 'text',
+          author: 'them',
+          data: { text: 'response...' },
+        },
+      ])
+      notifyAudio.play()
+    }
+  }, [messageList])
 
   return (
     <div className="app">
@@ -27,7 +34,7 @@ export default () => {
         <div className="sc-header">
           <div className="sc-header--team-name"> {'Fake Wallet'} </div>
         </div>
-        <div className="sc-message-list">
+        <div className="sc-message-list" ref={messageRef}>
           {messageList.map((message, i) => {
             return <Message message={message} key={i} />
           })}
