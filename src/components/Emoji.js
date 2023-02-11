@@ -10,7 +10,6 @@ export default observer((inputRef) => {
           style={{
             position: 'absolute',
             bottom: '20px',
-            right: '100px',
             width: '330px',
             maxHeight: '260px',
             height: '260px',

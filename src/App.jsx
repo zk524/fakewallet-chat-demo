@@ -151,13 +151,14 @@ export default observer(() => {
           style={{
             height: '100px',
             padding: '10px 0px 10px 10px',
-            margin: '0px',
+            margin: 0,
             position: 'relative',
             display: 'flex',
             backgroundColor: 'rgba(100,100,100,.1)',
             borderBottomLeftRadius: '10px',
             borderBottomRightRadius: '10px',
             transition: 'background-color 0.5s ease, box-shadow 0.5s ease',
+            boxSizing: 'border-box',
             ...(store.inputActive ? { backgroundColor: 'white' } : {}),
           }}
         >
