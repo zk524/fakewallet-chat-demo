@@ -2,8 +2,10 @@ export { observer } from 'mobx-react-lite'
 import { makeAutoObservable, runInAction } from 'mobx'
 import local from '@/controllers/local'
 
-const message = { type: 'text', author: 'wallet', data: { text: 'Welcome to Fake Wallet!' } }
 const INIT = () => {
+  const accounts = JSON.parse(local.get('__fakewallet__') || '["0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"]')
+  if (accounts.length === 1) local.set('__fakewallet__', JSON.stringify(accounts))
+  const address = accounts[0]
   return {
     loading: false,
     scanner: false,
@@ -11,19 +13,13 @@ const INIT = () => {
     connector: null,
     uri: '',
     chainId: 1,
-    accounts: JSON.parse(local.get('__fakewallet__') || '[]'),
-    address: '',
+    accounts,
+    address,
+    activeIndex: 0,
     requests: [],
     results: [],
-    activeIndex: 0,
-    payload: null,
-    peerMeta: {
-      description: '',
-      url: '',
-      icons: [],
-      name: '',
-      ssl: false,
-    },
+    payload: {},
+    peerMeta: {},
   }
 }
 
@@ -35,18 +31,17 @@ class Store {
   uri = ''
   chainId = 1
   accounts = []
-  wallets = []
   activeIndex = 0
   address = ''
   requests = []
   results = []
   payload = {}
-  peerMeta = { description: '', url: '', icons: [], name: '', ssl: false }
+  peerMeta = {}
 
   inputActive = false
   inputHasText = false
   emojiPickerIsOpen = false
-  messageList = [message]
+  messageList = [{ type: 'text', author: 'wallet', data: { text: 'Welcome to Fake Wallet!' } }]
 
   constructor() {
     makeAutoObservable(this)
@@ -54,24 +49,17 @@ class Store {
   }
 
   init = () => this.set(INIT())
-
-  set = (data) => {
-    runInAction(() => Object.keys(data).forEach((key) => (this[key] = data[key])))
-  }
-
-  updateAddress = (index) => {
+  set = (data) => runInAction(() => Object.keys(data).forEach((key) => (this[key] = data[key])))
+  setMessage = (msg) => runInAction(() => (this.messageList = [...this.messageList, msg]))
+  updateActiveIndex = (index) => {
     this.activeIndex = index
+    this.address = this.accounts[index]
   }
-
   updateAccounts = (accounts, index) => {
     runInAction(() => (this.accounts = accounts))
     local.set('__fakewallet__', JSON.stringify(accounts))
     this.address = accounts.slice(-1)[0]
     if (index !== void 0) this.activeIndex = index
-  }
-
-  setMessage = (msg) => {
-    runInAction(() => (this.messageList = [...this.messageList, msg]))
   }
 }
 

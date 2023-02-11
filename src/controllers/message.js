@@ -1,4 +1,4 @@
-import { updateaccounts, initWalletConnect } from '@/controllers/wallet'
+import { updateaccounts, initWalletConnect, killSession } from '@/controllers/wallet'
 
 export default async (msg) => {
   if (msg.type !== 'text') {
@@ -31,6 +31,10 @@ export default async (msg) => {
 
     case data.startsWith('wc:'):
       await initWalletConnect(data)
+      return ''
+
+    case data.startsWith('disconnect'):
+      killSession()
       return ''
 
     default:

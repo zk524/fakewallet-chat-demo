@@ -10,6 +10,7 @@ export async function init() {
   if (!session) {
     await Controller.init(activeIndex, chainId)
   } else {
+    console.log(session)
     const connector = new WalletConnect({ session })
     const { connected, accounts, peerMeta } = connector
     const address = accounts[0]
@@ -22,18 +23,28 @@ export async function init() {
   await getAppConfig().events.init(store, store.set)
 }
 
-const approveSession = () => {
+export const approveSession = () => {
   console.log('ACTION', 'approveSession')
   const { connector, chainId, address } = store
+  console.log(address)
   if (connector) connector.approveSession({ chainId, accounts: [address] })
   store.set({ connector })
 }
 
-const rejectSession = () => {
+export const rejectSession = () => {
   console.log('ACTION', 'rejectSession')
   const { connector } = store
   if (connector) connector.rejectSession()
   store.set({ connector })
+}
+
+export const killSession = () => {
+  console.log('ACTION', 'killSession')
+  const { connector } = store
+  if (connector) connector.killSession()
+  local.del('walletconnect')
+  store.init()
+  init()
 }
 
 function subscribeToEvents(connector) {
@@ -47,12 +58,20 @@ function subscribeToEvents(connector) {
     store.setMessage({
       type: 'text',
       author: 'wallet',
-      data: { text: `name: ${peerMeta.name}\ndescription: ${peerMeta.description}\nurl: ${peerMeta.url}` },
+      // data: { text: `name: ${peerMeta.name}\ndescription: ${peerMeta.description}\nurl: ${peerMeta.url}` },
+      data: {
+        text: (
+          <div>
+            <span>Name: {peerMeta.name}</span>
+            <span>Description: {peerMeta.description}</span>
+            <span>Url: {peerMeta.url}</span>
+            <a onClick={approveSession}>Aprove</a>
+            <a onClick={rejectSession}>Reject</a>
+          </div>
+        ),
+      },
     })
     store.set({ peerMeta })
-    setTimeout(() => {
-      approveSession()
-    })
   })
 
   connector.on('session_update', (error) => {
@@ -82,10 +101,8 @@ function subscribeToEvents(connector) {
 
   if (connector.connected) {
     const { chainId, accounts } = connector
-    const index = 0
-    const address = accounts[index]
-    console.log(address, chainId)
-    Controller.update(index, chainId)
+    Controller.update(0, chainId)
+    store.set({ connected: true, address: accounts[0], connector, chainId })
   }
 }
 
@@ -93,9 +110,7 @@ export const initWalletConnect = async (uri) => {
   store.set({ loading: true })
   try {
     const connector = new WalletConnect({ uri })
-    if (!connector.connected) {
-      await connector.createSession()
-    }
+    if (!connector.connected) await connector.createSession()
     store.set({ connector, uri: connector.uri })
     subscribeToEvents(connector)
   } catch (err) {

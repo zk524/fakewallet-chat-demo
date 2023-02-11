@@ -92,11 +92,7 @@ function getChainData(chainId) {
 
 export function getAppConfig() {
   const accounts = store.accounts
-  if (accounts && accounts.length) appConfig.numberOfAccounts = accounts.length
-  else {
-    store.updateAccounts(['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'])
-    appConfig.numberOfAccounts = 0
-  }
+  appConfig.numberOfAccounts = accounts.length
   return appConfig
 }
 
