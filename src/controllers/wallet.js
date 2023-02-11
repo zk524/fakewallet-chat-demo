@@ -74,7 +74,6 @@ function subscribeToEvents(connector) {
   connector.on('connect', (error) => {
     if (error) throw error
     store.set({ connected: true })
-    store.setMessage({ type: 'text', author: 'wallet', data: { text: 'connect successfully' } })
   })
 
   connector.on('disconnect', (error) => {
@@ -88,6 +87,7 @@ function subscribeToEvents(connector) {
     const { chainId, accounts } = connector
     Controller.update(0, chainId)
     store.set({ connected: true, address: accounts[0], connector, chainId })
+    store.setMessage({ type: 'text', author: 'wallet', data: { text: `connected: ${accounts[0]}` } })
   }
 }
 
