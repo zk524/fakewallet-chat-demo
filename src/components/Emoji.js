@@ -14,7 +14,7 @@ export default observer((inputRef) => {
             width: '330px',
             maxHeight: '260px',
             height: '260px',
-            boxShadow: '0px 7px 40px 2px rgba(148, 149, 150, 0.3)',
+            boxShadow: '0px 1px 10px 2px rgba(148, 149, 150, 0.3)',
             background: 'white',
             borderRadius: '10px',
             outline: 'none',

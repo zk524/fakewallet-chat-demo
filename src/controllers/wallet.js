@@ -1,7 +1,7 @@
 import * as ethers from 'ethers'
 import WalletConnect from '@walletconnect/client'
 import store from '@/controllers/store'
-import local from '@/helpers/local'
+import local from '@/controllers/local'
 import Controller, { getAppConfig } from '@/controllers'
 
 export async function init() {

@@ -54,7 +54,6 @@ export default observer(() => {
             borderTopRightRadius: '9px',
             color: 'white',
             padding: '10px',
-            boxShadow: '0 1px 4px rgba(0, 0, 0, 0.2)',
             position: 'relative',
             boxSizing: 'border-box',
             display: 'flex',
@@ -117,88 +116,73 @@ export default observer(() => {
           ))}
         </div>
 
-        <form
+        <div
           style={{
-            minHeight: '100px',
-            margin: '0px',
-            position: 'relative',
-            bottom: 0,
+            width: '100%',
             display: 'flex',
-            backgroundColor: '#f4f7f9',
-            borderBottomLeftRadius: '10px',
-            borderBottomRightRadius: '10px',
-            transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
-            ...(store.inputActive
-              ? { backgroundColor: 'white', boxShadow: '0px -5px 20px 0px rgba(150, 165, 190, 0.2)' }
-              : {}),
+            padding: '5px 10px',
+            backgroundColor: 'rgba(100,100,100,.1)',
+            boxSizing: 'border-box',
           }}
         >
           <div
-            role="button"
-            tabIndex="0"
+            style={{
+              width: '30px',
+              display: 'flex',
+              flexDirection: 'column',
+              justifCcontent: 'center',
+            }}
+          >
+            <Send onClick={handleKeyDown} />
+          </div>
+          <div
+            style={{
+              width: '30px',
+              display: 'flex',
+              flexDirection: 'column',
+              justifCcontent: 'center',
+            }}
+          >
+            <Emoji inputRef={inputRef} />
+          </div>
+        </div>
+
+        <form
+          style={{
+            height: '100px',
+            padding: '10px 0px 10px 10px',
+            margin: '0px',
+            position: 'relative',
+            display: 'flex',
+            backgroundColor: 'rgba(100,100,100,.1)',
+            borderBottomLeftRadius: '10px',
+            borderBottomRightRadius: '10px',
+            transition: 'background-color 0.5s ease, box-shadow 0.5s ease',
+            ...(store.inputActive ? { backgroundColor: 'white' } : {}),
+          }}
+        >
+          <div
             onFocus={() => store.set({ inputActive: true })}
             onBlur={() => store.set({ inputActive: false })}
             ref={inputRef}
             onKeyDown={handleKeyDown}
             onKeyUp={(e) => store.set({ inputHasText: e.target.innerHTML.length !== 0 && e.target.innerText !== '\n' })}
             contentEditable="true"
-            placeholder="Write a reply..."
+            placeholder="Command..."
             style={{
               width: '100%',
-              resize: 'none',
-              border: 'none',
+              height: '100%',
               outline: 'none',
+              paddingRight: '6px',
               borderBottomLeftRadius: '10px',
-              boxSizing: 'border-box',
-              padding: '18px 36px 18px 18px',
               fontSize: '15px',
-              fontWeight: 400,
-              lineHeight: 1.33,
               whiteSpace: 'pre-wrap',
               wordWrap: 'break-word',
-              color: '#565867',
-              WebkitFontSmoothing: 'antialiased',
-              maxHeight: '200px',
               overflow: 'scroll',
-              bottom: 0,
               overflowX: 'hidden',
               overflowY: 'auto',
             }}
           ></div>
-          <div
-            style={{
-              marginTop: '10px',
-              width: '100px',
-              position: 'absolute',
-              right: '10px',
-              height: '100%',
-              display: 'flex',
-              justifyContent: 'flex-end',
-            }}
-          >
-            <div
-              style={{
-                width: '30px',
-                height: '55px',
-                display: 'flex',
-                flexDirection: 'column',
-                justifCcontent: 'center',
-              }}
-            >
-              <Emoji inputRef={inputRef} />
-            </div>
-            <div
-              style={{
-                width: '30px',
-                height: '55px',
-                display: 'flex',
-                flexDirection: 'column',
-                justifCcontent: 'center',
-              }}
-            >
-              <Send onClick={handleKeyDown} />
-            </div>
-          </div>
         </form>
       </div>
     </div>

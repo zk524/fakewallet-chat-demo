@@ -1,6 +1,6 @@
 export { observer } from 'mobx-react-lite'
 import { makeAutoObservable, runInAction } from 'mobx'
-import local from '@/helpers/local'
+import local from '@/controllers/local'
 
 const message = { type: 'text', author: 'wallet', data: { text: 'Welcome to Fake Wallet!' } }
 const INIT = () => {

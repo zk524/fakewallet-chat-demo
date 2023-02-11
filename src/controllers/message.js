@@ -10,7 +10,11 @@ export default async (msg) => {
 
   switch (true) {
     case data.startsWith('link'):
-      return 'link...'
+      return (
+        <a href="https://baidu.com" target="_blank">
+          test
+        </a>
+      )
 
     case data.startsWith('sign'):
       return 'sign...'
