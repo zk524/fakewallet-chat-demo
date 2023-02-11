@@ -2,7 +2,7 @@ import store, { observer } from '@/controllers/store'
 
 const emojiData = ['😄', '😃', '😀', '😊', '😉', '😍', '😘', '😚', '😗', '😙', '😜', '😝', '😛', '😳', '😁', '😔', '😌']
 
-export default observer((inputRef) => {
+export default observer(({ inputRef }) => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       <div style={{ position: 'relative', width: '150px' }}>
