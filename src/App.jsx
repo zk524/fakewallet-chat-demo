@@ -34,12 +34,9 @@ export default observer(() => {
     messageRef.current.scrollTop = messageRef.current.scrollHeight
     const last = messageList.slice(-1)[0]
     if (last.author === 'me')
-      messageController(last).then((res) => {
-        if (res) {
-          store.setMessage({ type: 'text', author: 'wallet', data: { text: res } })
-          notifyAudio.play()
-        }
-      })
+      messageController(last).then(
+        (text) => text && store.setMessage({ type: 'text', author: 'wallet', data: { text } }),
+      )
     else messageList.length > 1 && notifyAudio.play()
   }, [messageList])
 

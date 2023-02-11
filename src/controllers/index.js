@@ -15,36 +15,26 @@ const DEFAULT_CHAIN_ID = 1
 const API_KEY = '582a225362f74cb0bea84626a6140201'
 
 class RpcEngine {
-  engines = []
-  constructor() {
-    this.engines = [ethereum]
-  }
-
+  engines = [ethereum]
   filter(payload) {
     const engine = this.getEngine(payload)
     return engine.filter(payload)
   }
-
   router(payload, state, setState) {
     const engine = this.getEngine(payload)
     return engine.router(payload, state, setState)
   }
-
   render(payload) {
     const engine = this.getEngine(payload)
     return engine.render(payload)
   }
-
   signer(payload, state, setState) {
     const engine = this.getEngine(payload)
     return engine.signer(payload, state, setState)
   }
-
   getEngine(payload) {
     const match = this.engines.filter((engine) => engine.filter(payload))
-    if (!match || !match.length) {
-      throw new Error(`No RPC Engine found to handle payload with method ${payload.method}`)
-    }
+    if (!match || !match.length) throw new Error(`No RPC Engine found to handle payload with method ${payload.method}`)
     return match[0]
   }
 }
@@ -71,16 +61,7 @@ const appConfig = {
   },
 }
 
-function getaddress(val) {
-  switch (true) {
-    case ethers.utils.isAddress(val):
-      return ethers.utils.getAddress(val)
-    default:
-      throw new Error('cannot get address')
-  }
-}
-
-function getChainData(chainId) {
+export function getChainData(chainId) {
   const chainData = SUPPORTED_CHAINS.filter((chain) => chain.chain_id === chainId)[0]
   if (!chainData) throw new Error('ChainId missing or not supported')
   if (chainData.rpc_url.includes('infura.io') && chainData.rpc_url.includes('%API_KEY%') && API_KEY) {
@@ -99,23 +80,15 @@ export function getAppConfig() {
 export class Wallet extends ethers.Signer {
   address = null
   provider = null
-
+  constructor(address, provider) {
+    super()
+    if (provider) this.provider = provider
+    if (ethers.utils.isAddress(address)) this.address = ethers.utils.getAddress(address)
+  }
   static loadWallet(index) {
     const accounts = store.accounts
     const account = accounts[index]
-    return new Wallet(getaddress(account), undefined)
-  }
-  constructor(address, provider) {
-    super()
-    if (provider) {
-      this.provider = provider
-    }
-    if (ethers.utils.isAddress(address)) {
-      this.address = ethers.utils.getAddress(address)
-    }
-  }
-  getAddress() {
-    return Promise.resolve(this.address)
+    return new Wallet(ethers.utils.getAddress(account))
   }
   signMessage(message) {
     // const requestdisplay = getrequestdisplay()
@@ -160,25 +133,20 @@ export class WalletController {
   wallet = this.init()
   activeIndex = DEFAULT_ACTIVE_INDEX
   activeChainId = MAINNET_CHAIN_ID
-
   get provider() {
     return this.wallet.provider
   }
-
   isActive() {
     if (!this.wallet) return this.wallet
     return null
   }
-
   getIndex() {
     return this.activeIndex
   }
-
   getWallet(index, chainId) {
     if (!this.wallet || this.activeIndex === index || this.activeChainId === chainId) return this.init(index, chainId)
     return this.wallet
   }
-
   getAccounts(count = getAppConfig().numberOfAccounts) {
     const accounts = []
     let wallet = null
@@ -188,7 +156,6 @@ export class WalletController {
     }
     return accounts
   }
-
   getData(key) {
     let value = local.get(key)
     if (!value) {
@@ -206,39 +173,31 @@ export class WalletController {
     }
     return value
   }
-
   getPath(index = this.activeIndex) {
     this.path = `${getAppConfig().derivationPath}/${index}`
     return this.path
   }
-
   generateEntropy() {
     this.entropy = ethers.utils.hexlify(ethers.utils.randomBytes(16))
     return this.entropy
   }
-
   generateMnemonic() {
     this.mnemonic = ethers.utils.entropyToMnemonic(this.getEntropy())
     return this.mnemonic
   }
-
   generateWallet(index) {
     this.wallet = Wallet.loadWallet(index)
     return this.wallet
   }
-
   getEntropy() {
     return this.getData(ENTROPY_KEY)
   }
-
   getMnemonic() {
     return this.getData(MNEMONIC_KEY)
   }
-
   init(index = DEFAULT_ACTIVE_INDEX, chainId = DEFAULT_CHAIN_ID) {
     return this.update(index, chainId)
   }
-
   update(index, chainId) {
     this.activeIndex = index
     this.activeChainId = chainId
@@ -248,7 +207,6 @@ export class WalletController {
     this.wallet = wallet.connect(provider)
     return this.wallet
   }
-
   async populateTransaction(transaction) {
     let tx = Object.assign({}, transaction)
     if (this.wallet) {
@@ -268,7 +226,6 @@ export class WalletController {
     }
     return tx
   }
-
   async sendTransaction(transaction) {
     if (this.wallet) {
       if (transaction.from && transaction.from.toLowerCase() !== this.wallet.address.toLowerCase())
@@ -283,7 +240,6 @@ export class WalletController {
     } else console.error('No Active Account')
     return null
   }
-
   async signTransaction(data) {
     if (this.wallet) {
       if (data && data.from) delete data.from
@@ -294,7 +250,6 @@ export class WalletController {
     } else console.error('No Active Account')
     return null
   }
-
   async signMessage(data) {
     if (this.wallet) {
       const signingKey = new ethers.utils.SigningKey(this.wallet.privateKey)
@@ -304,17 +259,12 @@ export class WalletController {
     } else console.error('No Active Account')
     return null
   }
-
   async signPersonalMessage(message) {
-    if (this.wallet) {
-      const result = await this.wallet.signMessage(
-        ethers.utils.isHexString(message) ? ethers.utils.arrayify(message) : message,
-      )
-      return result
-    } else console.error('No Active Account')
+    if (this.wallet)
+      return await this.wallet.signMessage(ethers.utils.isHexString(message) ? ethers.utils.arrayify(message) : message)
+    else console.error('No Active Account')
     return null
   }
-
   async signTypedData(data) {
     if (this.wallet)
       return signTypedData_v4(Buffer.from(this.wallet.privateKey.slice(2), 'hex'), { data: JSON.parse(data) })

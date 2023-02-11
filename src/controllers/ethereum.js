@@ -2,10 +2,7 @@ import { signingMethods, convertHexToUtf8 } from '@walletconnect/utils'
 import { apiGetCustomRequest } from './api'
 import Controller from '.'
 
-const convertHexToNumber = (num) => {
-  return BigInt(num).toString()
-}
-
+const convertHexToNumber = (num) => BigInt(num).toString()
 function convertHexToUtf8IfPossible(hex) {
   try {
     return convertHexToUtf8(hex)
@@ -25,22 +22,14 @@ export function filterEthereumRequests(payload) {
 }
 
 export async function routeEthereumRequests(payload, state, setState) {
-  if (!state.connector) {
-    return
-  }
+  if (!state.connector) return
   const { chainId, connector } = state
   if (!signingMethods.includes(payload.method)) {
     try {
       const result = await apiGetCustomRequest(chainId, payload)
-      connector.approveRequest({
-        id: payload.id,
-        result,
-      })
+      connector.approveRequest({ id: payload.id, result })
     } catch (error) {
-      return connector.rejectRequest({
-        id: payload.id,
-        error: { message: 'JSON RPC method not supported' },
-      })
+      return connector.rejectRequest({ id: payload.id, error: { message: 'JSON RPC method not supported' } })
     }
   } else {
     const requests = state.requests
@@ -66,22 +55,12 @@ export function renderEthereumRequests(payload) {
             ? convertHexToNumber(payload.params[0].gasLimit)
             : '',
         },
-        {
-          label: 'Gas Price',
-          value: convertHexToNumber(payload.params[0].gasPrice),
-        },
-        {
-          label: 'Nonce',
-          value: convertHexToNumber(payload.params[0].nonce),
-        },
-        {
-          label: 'Value',
-          value: payload.params[0].value ? convertHexToNumber(payload.params[0].value) : '',
-        },
+        { label: 'Gas Price', value: convertHexToNumber(payload.params[0].gasPrice) },
+        { label: 'Nonce', value: convertHexToNumber(payload.params[0].nonce) },
+        { label: 'Value', value: payload.params[0].value ? convertHexToNumber(payload.params[0].value) : '' },
         { label: 'Data', value: payload.params[0].data },
       ]
       break
-
     case 'eth_sign':
       params = [
         ...params,
@@ -93,20 +72,11 @@ export function renderEthereumRequests(payload) {
       params = [
         ...params,
         { label: 'Address', value: payload.params[1] },
-        {
-          label: 'Message',
-          value: convertHexToUtf8IfPossible(payload.params[0]),
-        },
+        { label: 'Message', value: convertHexToUtf8IfPossible(payload.params[0]) },
       ]
       break
     default:
-      params = [
-        ...params,
-        {
-          label: 'params',
-          value: JSON.stringify(payload.params, null, '\t'),
-        },
-      ]
+      params = [...params, { label: 'params', value: JSON.stringify(payload.params, null, '\t') }]
       break
   }
   return params
@@ -114,86 +84,57 @@ export function renderEthereumRequests(payload) {
 
 export async function signEthereumRequests(payload, state) {
   const { connector, address, activeIndex, chainId } = state
-
   let errorMsg = ''
   let result = null
-
   if (connector) {
-    if (!Controller.isActive()) {
-      await Controller.init(activeIndex, chainId)
-    }
-
+    if (!Controller.isActive()) await Controller.init(activeIndex, chainId)
     let transaction = null
     let dataToSign = null
     let addressRequested = null
-
     switch (payload.method) {
       case 'eth_sendTransaction':
         transaction = payload.params[0]
         addressRequested = transaction.from
-        if (address.toLowerCase() === addressRequested.toLowerCase()) {
+        if (address.toLowerCase() === addressRequested.toLowerCase())
           result = await Controller.sendTransaction(transaction)
-        } else {
-          errorMsg = 'Address requested does not match active account'
-        }
+        else errorMsg = 'Address requested does not match active account'
         break
       case 'eth_signTransaction':
         transaction = payload.params[0]
         addressRequested = transaction.from
-        if (address.toLowerCase() === addressRequested.toLowerCase()) {
+        if (address.toLowerCase() === addressRequested.toLowerCase())
           result = await Controller.signTransaction(transaction)
-        } else {
-          errorMsg = 'Address requested does not match active account'
-        }
+        else errorMsg = 'Address requested does not match active account'
         break
       case 'eth_sign':
         dataToSign = payload.params[1]
         addressRequested = payload.params[0]
-        if (address.toLowerCase() === addressRequested.toLowerCase()) {
-          result = await Controller.signMessage(dataToSign)
-        } else {
-          errorMsg = 'Address requested does not match active account'
-        }
+        if (address.toLowerCase() === addressRequested.toLowerCase()) result = await Controller.signMessage(dataToSign)
+        else errorMsg = 'Address requested does not match active account'
         break
       case 'personal_sign':
         dataToSign = payload.params[0]
         addressRequested = payload.params[1]
-        if (address.toLowerCase() === addressRequested.toLowerCase()) {
+        if (address.toLowerCase() === addressRequested.toLowerCase())
           result = await Controller.signPersonalMessage(dataToSign)
-        } else {
-          errorMsg = 'Address requested does not match active account'
-        }
+        else errorMsg = 'Address requested does not match active account'
         break
       case 'eth_signTypedData':
         dataToSign = payload.params[1]
         addressRequested = payload.params[0]
-        if (address.toLowerCase() === addressRequested.toLowerCase()) {
+        if (address.toLowerCase() === addressRequested.toLowerCase())
           result = await Controller.signTypedData(dataToSign)
-        } else {
-          errorMsg = 'Address requested does not match active account'
-        }
+        else errorMsg = 'Address requested does not match active account'
         break
       default:
         break
     }
-
-    if (result) {
-      connector.approveRequest({
-        id: payload.id,
-        result,
-      })
-    } else {
+    if (result) connector.approveRequest({ id: payload.id, result })
+    else {
       let message = 'JSON RPC method not supported'
-      if (errorMsg) {
-        message = errorMsg
-      }
-      if (!Controller.isActive()) {
-        message = 'No Active Account'
-      }
-      connector.rejectRequest({
-        id: payload.id,
-        error: { message },
-      })
+      if (errorMsg) message = errorMsg
+      if (!Controller.isActive()) message = 'No Active Account'
+      connector.rejectRequest({ id: payload.id, error: { message } })
     }
   }
 }

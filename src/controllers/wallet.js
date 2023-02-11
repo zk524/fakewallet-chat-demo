@@ -3,6 +3,7 @@ import WalletConnect from '@walletconnect/client'
 import store from '@/controllers/store'
 import local from '@/controllers/local'
 import Controller, { getAppConfig } from '@/controllers'
+import { ConnectRequest } from '@/controllers/message'
 
 export async function init() {
   let { activeIndex, chainId } = store
@@ -10,7 +11,6 @@ export async function init() {
   if (!session) {
     await Controller.init(activeIndex, chainId)
   } else {
-    console.log(session)
     const connector = new WalletConnect({ session })
     const { connected, accounts, peerMeta } = connector
     const address = accounts[0]
@@ -24,27 +24,21 @@ export async function init() {
 }
 
 export const approveSession = () => {
-  console.log('ACTION', 'approveSession')
   const { connector, chainId, address } = store
-  console.log(address)
   if (connector) connector.approveSession({ chainId, accounts: [address] })
   store.set({ connector })
 }
 
 export const rejectSession = () => {
-  console.log('ACTION', 'rejectSession')
   const { connector } = store
   if (connector) connector.rejectSession()
   store.set({ connector })
 }
 
 export const killSession = () => {
-  console.log('ACTION', 'killSession')
   const { connector } = store
   if (connector) connector.killSession()
   local.del('walletconnect')
-  store.init()
-  init()
 }
 
 function subscribeToEvents(connector) {
@@ -58,17 +52,8 @@ function subscribeToEvents(connector) {
     store.setMessage({
       type: 'text',
       author: 'wallet',
-      // data: { text: `name: ${peerMeta.name}\ndescription: ${peerMeta.description}\nurl: ${peerMeta.url}` },
       data: {
-        text: (
-          <div>
-            <span>Name: {peerMeta.name}</span>
-            <span>Description: {peerMeta.description}</span>
-            <span>Url: {peerMeta.url}</span>
-            <a onClick={approveSession}>Aprove</a>
-            <a onClick={rejectSession}>Reject</a>
-          </div>
-        ),
+        text: <ConnectRequest onApprove={approveSession} onReject={rejectSession} peerMeta={peerMeta} />,
       },
     })
     store.set({ peerMeta })
@@ -87,14 +72,14 @@ function subscribeToEvents(connector) {
   })
 
   connector.on('connect', (error) => {
-    console.log('EVENT', 'connect')
     if (error) throw error
     store.set({ connected: true })
+    store.setMessage({ type: 'text', author: 'wallet', data: { text: 'connect successfully' } })
   })
 
   connector.on('disconnect', (error) => {
-    console.log('EVENT', 'disconnect')
     if (error) throw error
+    store.setMessage({ type: 'text', author: 'wallet', data: { text: 'disconnect successfully' } })
     store.init()
     init()
   })
