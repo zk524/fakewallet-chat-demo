@@ -64,6 +64,7 @@ export default observer(() => {
         <div
           style={{
             height: '80%',
+            minHeight: '400px',
             overflowY: 'auto',
             backgroundColor: 'white',
             backgroundSize: '100%',
