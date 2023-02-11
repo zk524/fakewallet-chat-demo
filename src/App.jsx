@@ -154,6 +154,7 @@ export default observer(() => {
             margin: 0,
             position: 'relative',
             display: 'flex',
+            flex: '0 0 auto',
             backgroundColor: 'rgba(100,100,100,.1)',
             borderBottomLeftRadius: '10px',
             borderBottomRightRadius: '10px',
@@ -172,7 +173,6 @@ export default observer(() => {
             placeholder="Command..."
             style={{
               width: '100%',
-              height: '100%',
               outline: 'none',
               paddingRight: '6px',
               borderBottomLeftRadius: '10px',
