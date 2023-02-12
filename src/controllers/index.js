@@ -44,7 +44,7 @@ const appConfig = {
   logo: walletconnectLogo,
   chainId: MAINNET_CHAIN_ID,
   derivationPath: ETH_STANDARD_PATH,
-  numberOfAccounts: 3,
+  numberOfAccounts: 0,
   colors: {
     defaultColor: '12, 12, 13',
     backgroundColor: '40, 44, 52',
@@ -64,7 +64,7 @@ const appConfig = {
 export function getChainData(chainId) {
   const chainData = SUPPORTED_CHAINS.filter((chain) => chain.chain_id === chainId)[0]
   if (!chainData) throw new Error('ChainId missing or not supported')
-  if (chainData.rpc_url.includes('infura.io') && chainData.rpc_url.includes('%API_KEY%') && API_KEY) {
+  if (chainData.rpc_url.includes('infura.io') && chainData.rpc_url.includes('%API_KEY%')) {
     const rpcUrl = chainData.rpc_url.replace('%API_KEY%', API_KEY)
     return { ...chainData, rpc_url: rpcUrl }
   }
@@ -89,6 +89,9 @@ export class Wallet extends ethers.Signer {
     const accounts = store.accounts
     const account = accounts[index]
     return new Wallet(ethers.utils.getAddress(account))
+  }
+  getAddress() {
+    return Promise.resolve(this.address)
   }
   signMessage(message) {
     // const requestdisplay = getrequestdisplay()
@@ -127,12 +130,20 @@ export class Wallet extends ethers.Signer {
 }
 
 export class WalletController {
-  path = this.getPath()
-  entropy = this.getEntropy()
-  mnemonic = this.getMnemonic()
-  wallet = this.init()
+  path = ''
+  entropy = ''
+  mnemonic = ''
+  wallet = null
   activeIndex = DEFAULT_ACTIVE_INDEX
   activeChainId = MAINNET_CHAIN_ID
+
+  constructor() {
+    this.path = this.getPath()
+    this.entropy = this.getEntropy()
+    this.mnemonic = this.getMnemonic()
+    this.wallet = this.init()
+  }
+
   get provider() {
     return this.wallet.provider
   }

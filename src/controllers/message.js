@@ -19,9 +19,17 @@ export const ConnectRequest = ({ onApprove, onReject, peerMeta }) => {
   )
 }
 
-export const PayloadRequest = ({ onApprove, onReject }) => {
+export const PayloadRequest = ({ payload, onApprove, onReject }) => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
+      {payload.map(({ label, value }, index) => {
+        return (
+          <div key={payload + index} style={{ marginBottom: '5px' }}>
+            <div style={{ marginBottom: '5px' }}>{label}:</div>
+            <code style={{ backgroundColor: 'rgba(0,0,0,.1)', borderRadius: '5px', padding: '5px' }}>{value}</code>
+          </div>
+        )
+      })}
       <div>
         <a onClick={onApprove} style={{ color: 'green', cursor: 'pointer', marginRight: '10px' }}>
           Aprove

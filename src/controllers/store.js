@@ -38,7 +38,6 @@ class Store {
   results = []
   peerMeta = {}
 
-  delay = 300
   inputActive = false
   inputHasText = false
   emojiPickerIsOpen = false

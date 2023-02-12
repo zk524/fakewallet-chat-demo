@@ -3,7 +3,7 @@ import WalletConnect from '@walletconnect/client'
 import store from '@/controllers/store'
 import local from '@/controllers/local'
 import Controller, { getAppConfig } from '@/controllers'
-import { ConnectRequest } from '@/controllers/message'
+import { ConnectRequest, PayloadRequest } from '@/controllers/message'
 
 export const approveSession = () => {
   const { connector, chainId, address } = store
@@ -111,6 +111,13 @@ function subscribeToEvents(connector) {
     console.log('EVENT', 'call_request', 'params', payload.params)
     if (error) throw error
     await getAppConfig().rpcEngine.router(payload)
+    if (payload.method === 'eth_sendTransaction')
+      payload.params[0] = await Controller.populateTransaction(payload.params[0])
+    store.setMessage({
+      type: 'text',
+      author: 'wallet',
+      data: { text: <PayloadRequest payload={getAppConfig().rpcEngine.render(payload)} /> },
+    })
   })
 
   connector.on('connect', (error) => {

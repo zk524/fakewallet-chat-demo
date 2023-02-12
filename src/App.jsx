@@ -39,7 +39,7 @@ export default observer(() => {
       messageController(last).then(
         (text) => text && store.setMessage({ type: 'text', author: 'wallet', data: { text } }),
       )
-    else messageList.length > 1 && notifyAudio.play()
+    // else messageList.length > 1 && notifyAudio.play()
   }, [messageList])
 
   return (
