@@ -56,8 +56,8 @@ const appConfig = {
   },
   rpcEngine: new RpcEngine(),
   events: {
-    init: (state, setState) => Promise.resolve(),
-    update: (state, setState) => Promise.resolve(),
+    init: () => Promise.resolve(),
+    update: () => Promise.resolve(),
   },
 }
 

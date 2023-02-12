@@ -5,24 +5,6 @@ import local from '@/controllers/local'
 import Controller, { getAppConfig } from '@/controllers'
 import { ConnectRequest } from '@/controllers/message'
 
-export async function init() {
-  let { activeIndex, chainId } = store
-  const session = local.get('walletconnect')
-  if (!session) {
-    await Controller.init(activeIndex, chainId)
-  } else {
-    const connector = new WalletConnect({ session })
-    const { connected, accounts, peerMeta } = connector
-    const address = accounts[0]
-    activeIndex = accounts.indexOf(address)
-    chainId = connector.chainId
-    await Controller.init(activeIndex, chainId)
-    store.set({ connected, connector, address, activeIndex, chainId, peerMeta })
-    subscribeToEvents(connector)
-  }
-  await getAppConfig().events.init(store, store.set)
-}
-
 export const approveSession = () => {
   const { connector, chainId, address } = store
   if (connector) connector.approveSession({ chainId, accounts: [address] })
@@ -43,13 +25,62 @@ export const updateSession = async (sessionParams) => {
   if (connector) connector.updateSession({ chainId: newChainId, accounts: [address] })
   store.set({ connector, address, activeIndex: newActiveIndex, chainId: newChainId })
   await Controller.update(newActiveIndex, newChainId)
-  await getAppConfig().events.init(store, store.set)
+  await getAppConfig().events.init()
 }
 
 export const killSession = () => {
   const { connector } = store
   if (connector) connector.killSession()
   local.del('walletconnect')
+}
+
+export const openRequest = async (request) => {
+  const payload = Object.assign({}, request)
+  const params = payload.params[0]
+  if (request.method === 'eth_sendTransaction') payload.params[0] = await Controller.populateTransaction(params)
+  store.set({ payload })
+}
+
+export const closeRequest = async () => {
+  const { requests, payload } = store
+  await store.set({ requests: requests.filter((request) => request.id !== payload.id), payload: null })
+}
+
+export const approveRequest = async () => {
+  const { connector, payload } = store
+  try {
+    await getAppConfig().rpcEngine.signer(payload)
+  } catch (error) {
+    console.error(error)
+    if (connector) connector.rejectRequest({ id: payload.id, error: { message: 'Failed or Rejected Request' } })
+  }
+  await closeRequest()
+  await store.set({ connector })
+}
+
+export const rejectRequest = async () => {
+  const { connector, payload } = store
+  if (connector) connector.rejectRequest({ id: payload.id, error: { message: 'Failed or Rejected Request' } })
+  await closeRequest()
+  await store.set({ connector })
+}
+
+export async function init() {
+  let { activeIndex, chainId } = store
+  const session = local.get('walletconnect')
+  if (!session) {
+    await Controller.init(activeIndex, chainId)
+  } else {
+    const connector = new WalletConnect({ session })
+    const { connected, accounts, peerMeta } = connector
+    const address = accounts[0]
+    activeIndex = accounts.indexOf(address)
+    chainId = connector.chainId
+    await Controller.init(activeIndex, chainId)
+    store.set({ connected, connector, address, activeIndex, chainId, peerMeta })
+    subscribeToEvents(connector)
+  }
+  await getAppConfig().events.init()
 }
 
 function subscribeToEvents(connector) {
@@ -79,7 +110,7 @@ function subscribeToEvents(connector) {
     console.log('EVENT', 'call_request', 'method', payload.method)
     console.log('EVENT', 'call_request', 'params', payload.params)
     if (error) throw error
-    await getAppConfig().rpcEngine.router(payload, store, store.set)
+    await getAppConfig().rpcEngine.router(payload)
   })
 
   connector.on('connect', (error) => {

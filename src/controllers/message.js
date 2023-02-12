@@ -19,6 +19,21 @@ export const ConnectRequest = ({ onApprove, onReject, peerMeta }) => {
   )
 }
 
+export const PayloadRequest = ({ onApprove, onReject }) => {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
+      <div>
+        <a onClick={onApprove} style={{ color: 'green', cursor: 'pointer', marginRight: '10px' }}>
+          Aprove
+        </a>
+        <a onClick={onReject} style={{ color: 'red', cursor: 'pointer' }}>
+          Reject
+        </a>
+      </div>
+    </div>
+  )
+}
+
 export default async (msg) => {
   if (msg.type !== 'text') {
     return false
@@ -54,6 +69,10 @@ export default async (msg) => {
         await updateSession({})
         return `current address: ${cache.address}`
       } else return 'set failed'
+
+    case data.startsWith('scan'):
+      store.set({ scanner: true })
+      return ''
 
     case data.startsWith('link'):
       return 'link...'

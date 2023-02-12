@@ -11,14 +11,14 @@ const INIT = () => {
     scanner: false,
     connected: false,
     connector: null,
+    payload: null,
     uri: '',
+    activeIndex: 0,
     chainId: 1,
     accounts,
     address,
-    activeIndex: 0,
     requests: [],
     results: [],
-    payload: {},
     peerMeta: {},
   }
 }
@@ -28,16 +28,17 @@ class Store {
   scanner = false
   connected = false
   connector = null
+  payload = null
   uri = ''
   chainId = 1
-  accounts = []
   activeIndex = 0
+  accounts = []
   address = ''
   requests = []
   results = []
-  payload = {}
   peerMeta = {}
 
+  delay = 300
   inputActive = false
   inputHasText = false
   emojiPickerIsOpen = false

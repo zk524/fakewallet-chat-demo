@@ -1,6 +1,7 @@
 import { signingMethods, convertHexToUtf8 } from '@walletconnect/utils'
 import { apiGetCustomRequest } from './api'
 import Controller from '.'
+import store from './store'
 
 const convertHexToNumber = (num) => BigInt(num).toString()
 function convertHexToUtf8IfPossible(hex) {
@@ -21,9 +22,9 @@ export function filterEthereumRequests(payload) {
   )
 }
 
-export async function routeEthereumRequests(payload, state, setState) {
-  if (!state.connector) return
-  const { chainId, connector } = state
+export async function routeEthereumRequests(payload) {
+  if (!store.connector) return
+  const { chainId, connector } = store
   if (!signingMethods.includes(payload.method)) {
     try {
       const result = await apiGetCustomRequest(chainId, payload)
@@ -32,9 +33,7 @@ export async function routeEthereumRequests(payload, state, setState) {
       return connector.rejectRequest({ id: payload.id, error: { message: 'JSON RPC method not supported' } })
     }
   } else {
-    const requests = state.requests
-    requests.push(payload)
-    await setState({ requests })
+    store.set({ requests: { ...store.requests, payload } })
   }
 }
 
@@ -82,8 +81,8 @@ export function renderEthereumRequests(payload) {
   return params
 }
 
-export async function signEthereumRequests(payload, state) {
-  const { connector, address, activeIndex, chainId } = state
+export async function signEthereumRequests(payload) {
+  const { connector, address, activeIndex, chainId } = store
   let errorMsg = ''
   let result = null
   if (connector) {
