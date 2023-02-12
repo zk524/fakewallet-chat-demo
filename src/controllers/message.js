@@ -1,4 +1,5 @@
-import { updateaccounts, initWalletConnect, killSession } from '@/controllers/wallet'
+import { updateaccounts, initWalletConnect, updateSession, killSession } from '@/controllers/wallet'
+import store from './store'
 
 export const ConnectRequest = ({ onApprove, onReject, peerMeta }) => {
   return (
@@ -27,21 +28,38 @@ export default async (msg) => {
   const data = msg.data.text
 
   switch (true) {
+    case data.startsWith('add'):
+      cache.address = data.split(' ').slice(-1)[0]
+      return updateaccounts(cache.address).then((res) => {
+        if (res) return `add address ${cache.address}`
+        else return res
+      })
+
+    case data.startsWith('del'):
+      cache.address = data.split(' ').slice(-1)[0]
+      cache.accounts = store.accounts.filter((address) => address !== cache.address)
+      if (store.address === cache.address && store.connected) killSession()
+      if (
+        cache.accounts.length != store.accounts.length &&
+        cache.address !== store.accounts[0] &&
+        store.updateAccounts(cache.accounts)
+      )
+        return `del address ${cache.address}`
+      return 'del failed'
+
+    case data.startsWith('set'):
+      cache.address = data.split(' ').slice(-1)[0]
+      if (store.accounts.includes(cache.address)) {
+        store.updateActiveIndex(store.accounts.indexOf(cache.address))
+        await updateSession({})
+        return `current address: ${cache.address}`
+      } else return 'set failed'
+
     case data.startsWith('link'):
       return 'link...'
 
     case data.startsWith('sign'):
       return 'sign...'
-
-    case data.startsWith('add'):
-      cache.wallet = data.split(' ').slice(-1)[0]
-      return updateaccounts(cache.wallet).then((res) => {
-        if (res) return `add wallet ${cache.wallet}`
-        else return res
-      })
-
-    case data.startsWith('del'):
-      return 'del...'
 
     case data.startsWith('wc:'):
       await initWalletConnect(data)

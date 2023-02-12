@@ -41,7 +41,15 @@ class Store {
   inputActive = false
   inputHasText = false
   emojiPickerIsOpen = false
-  messageList = [{ type: 'text', author: 'wallet', data: { text: 'Welcome to Fake Wallet!' } }]
+  messageList = [
+    {
+      type: 'text',
+      author: 'wallet',
+      data: {
+        text: 'Welcome to Fake Wallet!\nMethods:\n 1.add [address]\n 2.del [address]\n 3.set [address]\n 4.[wc:...]\n 5.disconnect',
+      },
+    },
+  ]
 
   constructor() {
     makeAutoObservable(this)
@@ -56,10 +64,14 @@ class Store {
     this.address = this.accounts[index]
   }
   updateAccounts = (accounts, index) => {
+    const count = accounts.length
+    if (count === 0) return false
     runInAction(() => (this.accounts = accounts))
     local.set('__fakewallet__', JSON.stringify(accounts))
     this.address = accounts.slice(-1)[0]
     if (index !== void 0) this.activeIndex = index
+    else if (this.activeIndex >= count) this.activeIndex = 0
+    return true
   }
 }
 

@@ -17,7 +17,7 @@ export async function init() {
     activeIndex = accounts.indexOf(address)
     chainId = connector.chainId
     await Controller.init(activeIndex, chainId)
-    store.set({ connected, connector, address, activeIndex, accounts, chainId, peerMeta })
+    store.set({ connected, connector, address, activeIndex, chainId, peerMeta })
     subscribeToEvents(connector)
   }
   await getAppConfig().events.init(store, store.set)
@@ -33,6 +33,17 @@ export const rejectSession = () => {
   const { connector } = store
   if (connector) connector.rejectSession()
   store.set({ connector })
+}
+
+export const updateSession = async (sessionParams) => {
+  const { connector, chainId, accounts, activeIndex } = store
+  const newChainId = sessionParams.chainId ?? chainId
+  const newActiveIndex = sessionParams.activeIndex ?? activeIndex
+  const address = accounts[newActiveIndex]
+  if (connector) connector.updateSession({ chainId: newChainId, accounts: [address] })
+  store.set({ connector, address, activeIndex: newActiveIndex, chainId: newChainId })
+  await Controller.update(newActiveIndex, newChainId)
+  await getAppConfig().events.init(store, store.set)
 }
 
 export const killSession = () => {
@@ -74,6 +85,7 @@ function subscribeToEvents(connector) {
   connector.on('connect', (error) => {
     if (error) throw error
     store.set({ connected: true })
+    store.setMessage({ type: 'text', author: 'wallet', data: { text: `connected: ${connector.accounts[0]}` } })
   })
 
   connector.on('disconnect', (error) => {
